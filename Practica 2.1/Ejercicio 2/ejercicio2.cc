@@ -37,6 +37,7 @@ void processMsg(int sd, char command, struct sockaddr* addr, socklen_t addrlen, 
 
 		default:
 		strcpy(msg, "Comando no soportado");
+		sendto(sd, "", 0, 1, addr, addrlen);
 		break;
 	}
 }
