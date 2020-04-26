@@ -3,8 +3,6 @@
 #include <netdb.h>
 #include <string.h>
 #include <iostream>
-#include <time.h>
-
 
 int main(int argc, char *argv[])
 {
@@ -42,6 +40,8 @@ int main(int argc, char *argv[])
 
     getnameinfo(&src_addr, addrlen, host, NI_MAXHOST, serv, NI_MAXSERV, NI_NUMERICHOST | NI_NUMERICSERV);
 
+    std::cout << "Conexion desde " << host << " " << serv << '\n';
+
     while (!exit)
     {
         char buffer[80]; 
@@ -51,8 +51,14 @@ int main(int argc, char *argv[])
         buffer[nBytes] = '\0'; 
 
         send(sd_client, buffer, nBytes, 0);
+
+        if(nBytes == 0 || !strcmp(buffer, "Q") || !strcmp(buffer, "q"))
+        {
+          exit = true;
+          
+        }
     }
   }
-
+  std::cout <<"Conexion Terminada" << '\n';
 	return 0;
 }
