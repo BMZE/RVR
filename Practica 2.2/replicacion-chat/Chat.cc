@@ -10,9 +10,9 @@ void ChatMessage::to_bin()
     char* tmp = _data + sizeof(int32_t);
     memcpy(tmp, &type, sizeof(int16_t));
     tmp += sizeof(int16_t);
-    memcpy(tmp, (void*)nick, 8);
+    memcpy(tmp, nick.c_str(), 8);
     tmp += 8;
-    memcpy(tmp, (void*)message, 80);
+    memcpy(tmp, message.c_str(), 80);
 }
 
 int ChatMessage::from_bin(char * bobj)
@@ -22,13 +22,13 @@ int ChatMessage::from_bin(char * bobj)
     memcpy(static_cast<void *>(_data), bobj, MESSAGE_SIZE);
 
     //Reconstruir la clase usando el buffer _data
-
+    char* tmp = _data + sizeof(int32_t);
     memcpy(&type, tmp,sizeof(int16_t));
     tmp += sizeof(int16_t);
-    char* tmp = bobj + sizeof(int32_t);
-    memcpy(nick,tmp,8);
+    tmp = bobj + sizeof(int32_t);
+    memcpy(&nick, tmp, 8);
     tmp += 8;
-    memcpy(message,tmp, 80);
+    memcpy(&message, tmp, 80);
     return 0;
 }
 
@@ -45,24 +45,44 @@ void ChatServer::do_messages()
         // - MESSAGE: Reenviar el mensaje a todos los clientes (menos el emisor)
         while (true)
         {
-            ChatMessage cm(nick, msg);
 
-            switch(cm.type)
+            Socket* client;
+            ChatMessage msg;
+            socket.recv(msg, client);
+
+
+            switch(msg.type)
             {
-                case 0:
-                    clients.push_back(cm);
+                case ChatMessage::LOGIN:
+                    clients.push_back(client);
+                    std::cout << msg.nick.c_str() << " connected" << std::endl;
                 break;
-                case 2:
-                    clients.pop_back();
+                case  ChatMessage::LOGOUT:
+                    for(int i = 0; i < clients.size(); i++)
+                    {
+                         if(!(*clients[i] == *client))
+                          {
+                            clients.erase(clients.begin() + i);
+                            break;
+                          }
+                    }
+                    std::cout << msg.nick.c_str() << " disconnected" << std::endl;
+
                 break;
-                case 1:
-                    socket.send(cm, socket);
+                case ChatMessage::MESSAGE:
+                    for(int i = 0; i < clients.size(); i++)
+                    {
+                        if(!(*clients[i] == *client))
+                            socket.send(msg, *clients[i]);
+                    }
+                    std::cout << msg.nick.c_str() << " sent a message" << std::endl;
                 break;
                 default:
                 break;
             }
 
         }
+    }
 }
 
 void ChatClient::login()

@@ -26,7 +26,8 @@ Socket::Socket(const char * address, const char * port):sd(-1)
     sd = socket(res->ai_family, res->ai_socktype, 0);    
     if(sd < 0)
         std::cout << "Error creating socket" << std::endl;
-    
+
+     freeaddrinfo(res);
 }
 
 int Socket::recv(Serializable &obj, Socket * &sock)
@@ -60,9 +61,11 @@ int Socket::send(Serializable& obj, const Socket& sock)
 
     obj.to_bin();
 
-    int data = sendto(sock.sd, (void*)obj.data(), obj.size(), 0, (struct sockaddr*)&sock.sa, sock.sa_len);
+    int data = sendto(sd, (void*)obj.data(), obj.size(), 0, (struct sockaddr*)&sock.sa, sock.sa_len);
 
-    return data;
+    if(data <= 0)
+        return -1;
+    return 0;
 }
 
 bool operator== (const Socket &s1, const Socket &s2)
