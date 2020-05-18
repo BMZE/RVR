@@ -43,7 +43,26 @@ void ChatServer::do_messages()
         // - LOGIN: Añadir al vector clients
         // - LOGOUT: Eliminar del vector clients
         // - MESSAGE: Reenviar el mensaje a todos los clientes (menos el emisor)
-    }
+        while (true)
+        {
+            ChatMessage cm(nick, msg);
+
+            switch(cm.type)
+            {
+                case 0:
+                    clients.push_back(cm);
+                break;
+                case 2:
+                    clients.pop_back();
+                break;
+                case 1:
+                    socket.send(cm, socket);
+                break;
+                default:
+                break;
+            }
+
+        }
 }
 
 void ChatClient::login()

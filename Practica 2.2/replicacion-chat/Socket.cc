@@ -20,7 +20,7 @@ Socket::Socket(const char * address, const char * port):sd(-1)
     if(rc < 0)
         std::cout << "Conexion error" << std::endl;
     
-    sa = res->ai_addr;
+    sa = *res->ai_addr;
     sa_len = res->ai_addrlen;
 
     sd = socket(res->ai_family, res->ai_socktype, 0);    
