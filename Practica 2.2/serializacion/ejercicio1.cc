@@ -32,7 +32,13 @@ public:
 
     int from_bin(char * data)
     {
-        //
+        char * tmp = data + sizeof(int32_t);
+        memcpy(name, tmp, MAX_NAME);
+        tmp += MAX_NAME;
+        memcpy(&pos_x, tmp, sizeof(int16_t));
+        tmp += sizeof(int16_t);
+        memcpy(&pos_y, tmp, sizeof(int16_t));
+        
         return 0;
     }
 
@@ -63,7 +69,15 @@ int main(int argc, char **argv)
 
     write(file, one_w.data(), one_w.size());
 
+
+    read(file, one_w.data(), one_w.size());
+
     close(file);
+
+    one_r.from_bin(one_w.data());
+
+    std::cout << "Player name: " << one_r.name << " Pos_x: " << one_r.pos_x << " Pos_y: " << one_r.pos_y << std::endl; 
+
 
     return 0;
 }
