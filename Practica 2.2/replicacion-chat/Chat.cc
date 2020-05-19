@@ -53,12 +53,11 @@ void ChatServer::do_messages()
             ChatMessage msg;
             socket.recv(msg, client);
 
-
             switch(msg.type)
             {
                 case ChatMessage::LOGIN:
                     clients.push_back(client);
-                    std::cout << msg.nick.c_str() << " connected" << std::endl;
+                    std::cout << msg.nick.c_str() << " logged in" << std::endl;
                 break;
                 case  ChatMessage::LOGOUT:
                     for(int i = 0; i < clients.size(); i++)
@@ -69,21 +68,22 @@ void ChatServer::do_messages()
                             break;
                           }
                     }
-                    std::cout << msg.nick.c_str() << " disconnected" << std::endl;
+                    std::cout << msg.nick.c_str() << " logged out" << std::endl;
 
                 break;
                 case ChatMessage::MESSAGE:
-                    for(int i = 0; i < clients.size(); i++)
+                    for(Socket* sock: clients)
                     {
-                        if(!(*clients[i] == *client))
-                            socket.send(msg, *clients[i]);
+                        if(!(*sock == *client))
+                            socket.send(msg, *sock);
                     }
+
                     std::cout << msg.nick.c_str() << " sent a message" << std::endl;
-                break;
-                default:
                 break;
             }
 
+            std::cout << "Conected: " << clients.size() << std::endl;
+  
         }
     }
 }
@@ -137,7 +137,7 @@ void ChatClient::net_thread()
         socket.recv(em);
 
         if(em.nick != nick)
-            std::cout << "Nick: " << em.nick << " Message: " << em.message << std::endl;
+            std::cout << em.nick << ": " << em.message << std::endl;
         
     }
 }

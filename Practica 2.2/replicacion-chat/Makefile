@@ -1,4 +1,4 @@
-CC=g++
+CC=g++ -std=c++11
 CFLAGS=-g -I.
 DEPS = Socket.h Chat.h
 OBJ = Socket.o Chat.o
