@@ -53,23 +53,24 @@ void ChatServer::do_messages()
             ChatMessage msg;
             socket.recv(msg, client);
 
+            int count = 0;
             switch(msg.type)
             {
                 case ChatMessage::LOGIN:
                     clients.push_back(client);
                     std::cout << msg.nick.c_str() << " logged in" << std::endl;
                 break;
-                case  ChatMessage::LOGOUT:
-                    for(int i = 0; i < clients.size(); i++)
-                    {
-                         if(!(*clients[i] == *client))
-                          {
-                            clients.erase(clients.begin() + i);
-                            break;
-                          }
-                    }
+                case ChatMessage::LOGOUT:
                     std::cout << msg.nick.c_str() << " logged out" << std::endl;
-
+                    for(Socket* sock: clients)
+                    {
+                        if((*sock == *client))
+                        {
+                            clients.erase(clients.begin() + count);
+                            break;
+                        }
+                        count++;
+                    }
                 break;
                 case ChatMessage::MESSAGE:
                     for(Socket* sock: clients)
@@ -119,9 +120,18 @@ void ChatClient::input_thread()
         std::string msg;
         std::getline(std::cin, msg);
 
-        ChatMessage em (nick, msg);
-        em.type = ChatMessage::MESSAGE;
-        socket.send(em, socket);
+        //mensaje para desconectarse del servidor
+        if(msg == "LOGOUT") 
+        {
+            logout();
+            break;
+        }
+        else
+        {
+            ChatMessage em (nick, msg);
+            em.type = ChatMessage::MESSAGE;
+            socket.send(em, socket);
+        }
     }
 }
 
